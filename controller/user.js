@@ -6,7 +6,6 @@ module.exports = {
     //set up route configuration that will be handle by express server
     configure: function (app) {
 
-   
     var formate='YYYY-MM-DD HH:mm:ss';
        /**********************/
         

@@ -1,12 +1,12 @@
 // var mysql = require('mysql');
 // // for localhost
+// var db_constants = require('../constants/db_constants');
 //  var con = mysql.createConnection({
-//    host: "localhost",
-//    user: "root",
-//   // password:"shanti@mysql",
-//    //password: "",
-//    port:3306,
-//   database : "carrel"
+//      host: "hostel9685.czqufacnwj4v.us-east-2.rds.amazonaws.com",
+//      user: "hostel9685",
+//      password: "hostel9685",
+//      port: 3306,
+//      database: "carrel"
 //  });
 // // for aws server
 // //~ var con = mysql.createConnection({
@@ -18,8 +18,12 @@
 //   //~ ///port:"4000"
 // //~ });
 // con.connect(function(err) {
-//   if (err) throw err;
-//   console.log("DataBase Connected!!");
+//
+//     if (err) {
+//         console.error('Database connection failed: ' + err.stack);
+//         return;
+//     }
+//     console.log('Connected to database Succesfully.');
 // });
 // module.exports = con;
 
@@ -43,3 +47,7 @@ connection.connect(function (err) {
 });
 
 module.exports = connection;
+
+
+
+
