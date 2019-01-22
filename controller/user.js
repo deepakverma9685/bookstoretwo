@@ -325,7 +325,7 @@ module.exports = {
               req.checkBody('city', 'city is required').notEmpty();
               req.checkBody('state', 'state is required').notEmpty();
               req.checkBody('country', 'country is required').notEmpty();
-              req.checkBody('class', 'class is required').notEmpty();
+              req.checkBody('classes', 'class is required').notEmpty();
               req.checkBody('publish', 'publish is required').notEmpty();
 			}
 		
