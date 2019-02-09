@@ -12,5 +12,10 @@ app.use(express.static(path.join(__dirname, '/public')));
 var constant = require('./connection/constant');
 var user = require('./controller/user'); 
 global.date = require('date-and-time');
-app.listen(app.listen(4000)); 
+
+
+var port = normalizePort(process.env.PORT || '4000');
+app.set('port', port);
+
+app.listen(port);
 user.configure(app);
