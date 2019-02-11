@@ -769,7 +769,7 @@ module.exports = {
                         if(result.data.length>0)
                         {
 
-                            var select="SELECT count(quantity) as totalcount FROM cr_cart_items WHERE cart_id='"+req.body.uid+"'";
+                            var select="SELECT SUM(quantity) as totalcount FROM cr_cart_items WHERE cart_id='"+req.body.uid+"'";
                             transactions.customeQuery(select,function(productRes){
                                 if(productRes.status==1)
                                 {
