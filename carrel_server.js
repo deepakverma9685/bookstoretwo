@@ -3,6 +3,7 @@ const app = express();
 var bodyParser = require('body-parser');
 const expressValidator = require('express-validator');
 const path = require('path');
+var multer = require('multer');
 //const fs = require('fs');
 app.use(expressValidator());
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
@@ -10,6 +11,15 @@ app.use(bodyParser.json());
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+var Storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null,path.join(__dirname, '/public/images'));
+    },
+    filename: function (req, file, callback) {
+        callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
+    }
+});
 
 app.use(express.static(path.join(__dirname, '/public')));
 var constant = require('./connection/constant');
@@ -24,9 +34,13 @@ app.listen(port);
 user.configure(app);
 var thankyouindex = require('./controller/thankyou');
 var addbook = require('./controller/addbooks');
+var stationary = require('./controller/Stationary');
+var thankyoustat = require('./controller/tankyoustat');
 
 app.use('/addbooks',addbook);
 app.use('/thank',thankyouindex);
+app.use('/stationary',stationary);
+app.use('/thankyoustat',thankyoustat);
 
 function normalizePort(val) {
     var port = parseInt(val, 10);

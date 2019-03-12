@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
+var multer = require('multer');
 var dbconnect = require('../connection/db');
+
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -10,7 +12,7 @@ router.get('/', function (req, res, next) {
 
 router.post('/post', function (req, res, nex) {
 
-    console.log(req.body.school)
+    console.log(req.body.school);
 
     var today = new Date();
     var add_books = {
@@ -64,8 +66,6 @@ router.post('/post', function (req, res, nex) {
             }
         })
     }
-
-
 });
 
 module.exports = router;
