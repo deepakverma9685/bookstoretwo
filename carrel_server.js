@@ -14,7 +14,7 @@ app.set('view engine', 'ejs');
 
 var Storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        callback(null,path.join(__dirname, '/public/images'));
+        callback(null,path.join(__dirname, '/public'));
     },
     filename: function (req, file, callback) {
         callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
@@ -24,6 +24,7 @@ var Storage = multer.diskStorage({
 app.use(express.static(path.join(__dirname, '/public')));
 var constant = require('./connection/constant');
 var user = require('./controller/user'); 
+var teacher = require('./controller/teacher');
 global.date = require('date-and-time');
 
 
@@ -32,6 +33,7 @@ app.set('port', port);
 
 app.listen(port);
 user.configure(app);
+teacher.configure(app);
 var thankyouindex = require('./controller/thankyou');
 var addbook = require('./controller/addbooks');
 var stationary = require('./controller/Stationary');

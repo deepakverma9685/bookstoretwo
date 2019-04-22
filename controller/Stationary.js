@@ -5,7 +5,7 @@ var dbconnect = require('../connection/db');
 
 var Storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        callback(null,'../public/images');
+        callback(null,'../public');
     },
     filename: function (req, file, callback) {
         callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
@@ -17,15 +17,18 @@ var upload = multer({ storage: Storage });
 //Field name and max count
 
 router.get("/", function (req, res) {
-    res.render('uploadimage');
+    res.render('addstationary');
 });
 
-router.post("/post",  upload.single('imgUploader'), function (req, res) {
+router.post("/post", function (req, res) {
 
     var today = new Date();
     var coulam='product_image,product_type,product_name,description,price,qty,make,created_on,updatetd_on';
     var values1=[["ffff",req.body.product_type,req.body.product_name,req.body.description,req.body.price,req.body.qty,req.body.make,today,today]];
     var query = "INSERT INTO cr_stationary"+"("+coulam+")  VALUES ? ";
+
+    console.log("Vlauesss ------------------>  >");
+    console.log(values1);
     dbconnect.query(query, [values1], function (error, results) {
         if (error) {
             console.log(error);

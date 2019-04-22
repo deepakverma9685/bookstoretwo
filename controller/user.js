@@ -850,53 +850,252 @@ module.exports = {
 
         });
 
-        app.post('/carrel/checkout', function (req, res) {
+        // app.post('/carrel/checkout', function (req, res) {
+        //     req.checkBody('api_key', '*API Key is required.').notEmpty();
+        //     req.checkBody('device_id', '*Device Id  is required.').notEmpty();
+        //     req.checkBody('device_type', '*Device Type is required.').notEmpty();
+        //     req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
+        //     req.checkBody('access_token', '*Access token is required.').notEmpty();
+        //     req.checkBody('uid', '*User id is required.').notEmpty();
+        //     req.checkBody('order_status', '*Address id is required.').notEmpty();
+        //     req.checkBody('order_price', '*Address id is required.').notEmpty();
+        //     req.checkBody('payment_mode', '*Address id is required.').notEmpty();
+        //     req.checkBody('order_address', '*Address id is required.').notEmpty();
+        //
+        //     if (req.validationErrors()) {
+        //         var message = req.validationErrors();
+        //         // var messg=req.flash();
+        //         var result = {status: 0, message: message[0].msg};
+        //         return res.send(result);
+        //     }else {
+        //
+        //         transactions.CheckAccessToken('cr_devices', req.body, function (result) {
+        //             if (result.status == 1) {
+        //
+        //                 if (result.data.length > 0) {
+        //                     var coulam='order_price,order_address,order_status,order_userid,payment_mode,created_on,updated_on';
+        //                     var values1=[[req.body.order_price,req.body.order_address,"in_process",req.body.price,req.body.uid,date1,req.body.uid]];
+        //                     transactions.insert('cr_cart_items',coulam,values1,function(insertData){
+        //                         if(insertData.status==1){
+        //                             res.send({status:1,message:'success'});
+        //                         }
+        //                         else res.send({status:0,message:insertData.err});
+        //
+        //                     });
+        //
+        //                 }
+        //                 else {
+        //                     res.send({status: 3, message: 'Invalid access token'});
+        //                 }
+        //
+        //             }
+        //             else {
+        //                 res.send({status: 0, message: result.err});
+        //             }
+        //         });
+        //
+        //     }
+        //
+        // });
+
+
+        app.post('/carrel/checkout', function (req, res){
+            //console.log(req.body);
             req.checkBody('api_key', '*API Key is required.').notEmpty();
             req.checkBody('device_id', '*Device Id  is required.').notEmpty();
             req.checkBody('device_type', '*Device Type is required.').notEmpty();
             req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
             req.checkBody('access_token', '*Access token is required.').notEmpty();
             req.checkBody('uid', '*User id is required.').notEmpty();
-            req.checkBody('order_status', '*Address id is required.').notEmpty();
-            req.checkBody('order_price', '*Address id is required.').notEmpty();
-            req.checkBody('payment_mode', '*Address id is required.').notEmpty();
-            req.checkBody('order_address', '*Address id is required.').notEmpty();
+            if(req.validationErrors())
+            {
+                var message=req.validationErrors();
+                // var messg=req.flash();
+                var result={status:0,message:message[0].msg};
+                return res.send(result);
+            }
+            else {
+                //Check access token
+                transactions.CheckAccessToken('cr_devices',req.body,function(result) {
+                    if(result.status==1) {
+                        if(result.data.length>0) {
 
+                            var select="SELECT * FROM `cr_cart_items` WHERE cart_id="+req.body.uid;
+                            transactions.customeQuery(select,function(productRes){
+                                if(productRes.status==1) {
+                                    if(productRes.data.length>0){
+                                        var column='`user_id`,`merchant_id`,`total_price`,`pay_status`,`status`,`created_by`,`created_on`';
+                                        var total=0;
+
+                                        for(var i=0; i<productRes.data.length;i++){
+                                            total=total+productRes.data[i].sub_total;
+                                        }
+                                        var d= new Date();
+                                        var date1=date.format(d,formate);
+
+                                        var valueisert=[[req.body.uid,productRes.data[0].business_id,total,'cash','confirmed',req.body.uid,date1]];
+
+                                        transactions.insert('cr_booking',column,valueisert,function(insertRes){
+
+                                            if(insertRes.status==1){
+                                                var insertDetls=[];
+                                                var coulm="booking_id,product_id,quantity,price,created_on,created_by";
+                                                for(var i=0; i<productRes.data.length;i++){
+                                                    var isrT=[insertRes.data.insertId,productRes.data[i].product_id,productRes.data[i].quantity,productRes.data[i].price,date1,req.body.uid];
+                                                    insertDetls.push(isrT);
+
+                                                }
+                                                transactions.insert('cr_booking_detail',coulm,insertDetls,function(inserTdelt){
+
+                                                    if(inserTdelt.status==1){
+
+                                                        var delteCart="DELETE FROM `cr_cart_items` WHERE cart_id="+req.body.uid;
+                                                        transactions.customeQuery(delteCart,function(dletRes){
+                                                            if(dletRes.status==1){
+                                                                res.send({status:1,message:"Order place successfully."});
+
+                                                            }
+                                                            else  res.send({status:0,message:dletRes.err});
+
+                                                        });
+                                                    }
+                                                    else res.send({status:0,message:inserTdelt.err});
+
+
+                                                });
+
+                                            }
+                                            else res.send({status:0,message:"You have not any product in your cart."});
+
+
+
+                                        });
+
+
+                                    }else res.send({status:0,message:"You have not any product in your cart."});
+                                    //res.send({status:1,cartData:productRes.data});
+                                }
+                                else res.send({status:0,message:productRes.err});
+
+                            });
+
+                        }
+                        else
+                        {
+                            res.send({status:3,message:'Invalid access token'});
+                        }
+                    }
+                    else
+                    {
+                        res.send({status:0,message:result.err});
+
+                    }
+                });
+            }
+
+        });
+
+
+        app.post('/carrel/askque', function (req, res) {
+            //console.log(req.body);
+            req.checkBody('api_key', '*API Key is required.').notEmpty();
+            req.checkBody('device_id', '*Device Id  is required.').notEmpty();
+            req.checkBody('device_type', '*Device Type is required.').notEmpty();
+            req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
+            req.checkBody('access_token', '*Access token is required.').notEmpty();
+            req.checkBody('uid', '*User id is required.').notEmpty();
+            req.checkBody('question', '*Question is required.').notEmpty();
             if (req.validationErrors()) {
                 var message = req.validationErrors();
                 // var messg=req.flash();
                 var result = {status: 0, message: message[0].msg};
                 return res.send(result);
-            }else {
-
+            }
+            else {
+                //Check access token
                 transactions.CheckAccessToken('cr_devices', req.body, function (result) {
                     if (result.status == 1) {
-
                         if (result.data.length > 0) {
-                            var coulam='order_price,order_address,order_status,order_userid,payment_mode,created_on,updated_on';
-                            var values1=[[req.body.order_price,req.body.order_address,"in_process",req.body.price,req.body.uid,date1,req.body.uid]];
-                            transactions.insert('cr_cart_items',coulam,values1,function(insertData){
-                                if(insertData.status==1){
-                                    res.send({status:1,message:'success'});
-                                }
-                                else res.send({status:0,message:insertData.err});
+                            var d= new Date();
+                            var date1=date.format(d,formate);
+                            var column='`user_id`,`question`,`created_by`,`created_on`';
+                            var valueisert=[[req.body.uid,req.body.question,req.body.uid,date1]];
 
+                            transactions.insert('cr_student_que', column, valueisert, function (inserTdelt) {
+
+                                if (inserTdelt.status == 1) {
+                                    res.send({status: 1, message: 'Question Posted Successfully'});
+                                } else{
+                                    res.send({status: 0, message: inserTdelt.err});
+                                }
                             });
 
-                        }
-                        else {
+                        } else {
                             res.send({status: 3, message: 'Invalid access token'});
                         }
-
-                    }
-                    else {
+                    } else {
                         res.send({status: 0, message: result.err});
+
                     }
                 });
+            }
 
+        });
+
+        app.post('/carrel/answer_que', function (req, res) {
+            //console.log(req.body);
+            req.checkBody('api_key', '*API Key is required.').notEmpty();
+            req.checkBody('device_id', '*Device Id  is required.').notEmpty();
+            req.checkBody('device_type', '*Device Type is required.').notEmpty();
+            req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
+            req.checkBody('access_token', '*Access token is required.').notEmpty();
+            req.checkBody('uid', '*User id is required.').notEmpty();
+            req.checkBody('que_id', '*Question  id is required.').notEmpty();
+            req.checkBody('role', '*role is required.').notEmpty();
+            req.checkBody('teacher', '*teacher name is required.').notEmpty();
+            req.checkBody('answer', '*answer is required.').notEmpty();
+            if (req.validationErrors()) {
+                var message = req.validationErrors();
+                // var messg=req.flash();
+                var result = {status: 0, message: message[0].msg};
+                return res.send(result);
+            }
+            else {
+                //Check access token
+                transactions.CheckAccessToken('cr_devices', req.body, function (result) {
+                    if (result.status == 1) {
+                        if (result.data.length > 0) {
+                            var d= new Date();
+                            var date1=date.format(d,formate);
+                            var column='`user_id`,`que_id`,`role`,`teacher`,`answer`,`created_by`,`created_on`';
+                            var valueisert=[[req.body.uid,req.body.que_id,req.body.role,req.body.teacher,req.body.answer,req.body.uid,date1]];
+
+                            transactions.insert('cr_student_ans', column, valueisert, function (inserTdelt) {
+
+                                if (inserTdelt.status == 1) {
+                                    res.send({status: 1, message: 'Answer Posted Successfully'});
+                                } else{
+                                    res.send({status: 0, message: inserTdelt.err});
+                                }
+                            });
+
+                        } else {
+                            res.send({status: 3, message: 'Invalid access token'});
+                        }
+                    } else {
+                        res.send({status: 0, message: result.err});
+
+                    }
+                });
             }
 
         })
+
+
+
+
+
+
 
     } //configure End
 };
