@@ -34,12 +34,11 @@ router.post('/post', function (req, res, nex) {
         "publish":"yes",
         "created_by":1,
         "updated_by":1,
-        "status":"yes",
+        "status":"active",
         "created_on": today,
         "updated_on": today
     };
 
-    console.log(add_books);
 
     if (add_books != null) {
 
