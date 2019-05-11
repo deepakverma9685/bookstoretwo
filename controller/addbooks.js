@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 var multer = require('multer');
 var dbconnect = require('../connection/db');
-
+var Stoarge = require("../connection/Storage");
+var upload = multer({storage: Stoarge});
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -10,7 +11,7 @@ router.get('/', function (req, res, next) {
 });
 
 
-router.post('/post', function (req, res, nex) {
+router.post('/post', upload.single('imgUploader'), function (req, res, nex) {
 
     console.log(req.body.school);
 
@@ -36,7 +37,8 @@ router.post('/post', function (req, res, nex) {
         "updated_by":1,
         "status":"active",
         "created_on": today,
-        "updated_on": today
+        "updated_on": today,
+        "book_images": req.file.filename,
     };
 
 

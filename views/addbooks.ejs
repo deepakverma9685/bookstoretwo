@@ -98,7 +98,9 @@
             Carrel Schools
         </h1>
     </div>
-    <form method="post" action="/addbooks/post">
+
+    <form enctype="multipart/form-data" method="post" action="/addbooks/post">
+        <input type="file" name="imgUploader" multiple />
         <div class="row">
             <div class="col-25">
                 <label for="country">Book Name</label>

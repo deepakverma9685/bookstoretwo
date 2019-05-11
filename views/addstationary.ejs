@@ -97,7 +97,8 @@
             Carrel Schools
         </h1>
     </div>
-    <form action="/stationary/post/" method="post">
+    <form  enctype="multipart/form-data"  action="/stationary/post/" method="post">
+        <input type="file" name="imgUploader" multiple />
         <div class="row">
             <div class="col-25">
                 <label for="country">Product Type</label>

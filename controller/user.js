@@ -850,53 +850,6 @@ module.exports = {
 
         });
 
-        // app.post('/carrel/checkout', function (req, res) {
-        //     req.checkBody('api_key', '*API Key is required.').notEmpty();
-        //     req.checkBody('device_id', '*Device Id  is required.').notEmpty();
-        //     req.checkBody('device_type', '*Device Type is required.').notEmpty();
-        //     req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
-        //     req.checkBody('access_token', '*Access token is required.').notEmpty();
-        //     req.checkBody('uid', '*User id is required.').notEmpty();
-        //     req.checkBody('order_status', '*Address id is required.').notEmpty();
-        //     req.checkBody('order_price', '*Address id is required.').notEmpty();
-        //     req.checkBody('payment_mode', '*Address id is required.').notEmpty();
-        //     req.checkBody('order_address', '*Address id is required.').notEmpty();
-        //
-        //     if (req.validationErrors()) {
-        //         var message = req.validationErrors();
-        //         // var messg=req.flash();
-        //         var result = {status: 0, message: message[0].msg};
-        //         return res.send(result);
-        //     }else {
-        //
-        //         transactions.CheckAccessToken('cr_devices', req.body, function (result) {
-        //             if (result.status == 1) {
-        //
-        //                 if (result.data.length > 0) {
-        //                     var coulam='order_price,order_address,order_status,order_userid,payment_mode,created_on,updated_on';
-        //                     var values1=[[req.body.order_price,req.body.order_address,"in_process",req.body.price,req.body.uid,date1,req.body.uid]];
-        //                     transactions.insert('cr_cart_items',coulam,values1,function(insertData){
-        //                         if(insertData.status==1){
-        //                             res.send({status:1,message:'success'});
-        //                         }
-        //                         else res.send({status:0,message:insertData.err});
-        //
-        //                     });
-        //
-        //                 }
-        //                 else {
-        //                     res.send({status: 3, message: 'Invalid access token'});
-        //                 }
-        //
-        //             }
-        //             else {
-        //                 res.send({status: 0, message: result.err});
-        //             }
-        //         });
-        //
-        //     }
-        //
-        // });
 
 
         app.post('/carrel/checkout', function (req, res){
@@ -1113,6 +1066,55 @@ module.exports = {
 
 
                             var selectProduct='SELECT * FROM cr_institute';
+                            transactions.customeQuery(selectProduct,function(productRes){
+                                if(productRes.status==1) {
+                                    res.send({
+                                        status:1,
+                                        message: 'success',
+                                        data:productRes.data
+                                    });
+                                }
+                                else{
+                                    res.send({
+                                        status:0,
+                                        message:productRes.err
+                                    });
+                                }
+                            });
+
+                        } else {
+                            res.send({status: 3, message: 'Invalid access token'});
+                        }
+                    } else {
+                        res.send({status: 0, message: result.err});
+
+                    }
+                });
+            }
+
+        })
+
+
+        app.post('/carrel/stationary', function (req, res) {
+            //console.log(req.body);
+            req.checkBody('api_key', '*API Key is required.').notEmpty();
+            req.checkBody('device_id', '*Device Id  is required.').notEmpty();
+            req.checkBody('device_type', '*Device Type is required.').notEmpty();
+            req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
+            req.checkBody('access_token', '*Access token is required.').notEmpty();
+            req.checkBody('uid', '*User id is required.').notEmpty();
+            if (req.validationErrors()) {
+                var message = req.validationErrors();
+                // var messg=req.flash();
+                var result = {status: 0, message: message[0].msg};
+                return res.send(result);
+            }
+            else {
+                //Check access token
+                transactions.CheckAccessToken('cr_devices', req.body, function (result) {
+                    if (result.status == 1) {
+                        if (result.data.length > 0) {
+                            var selectProduct='SELECT * FROM cr_stationary';
                             transactions.customeQuery(selectProduct,function(productRes){
                                 if(productRes.status==1) {
                                     res.send({
