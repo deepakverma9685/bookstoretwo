@@ -13,11 +13,19 @@ router.get('/', function (req, res, next) {
 
 router.post('/post', upload.single('imgUploader'), function (req, res, nex) {
 
-    console.log(req.body.school);
-
     var today = new Date();
+
+    let file = "";
+    if(req.file){
+        file = req.file.filename;
+    }else {
+        file = "";
+    }
+
+
     var add_books = {
         "user_id": 1,
+        "product_type":"books",
         "book_name":req.body.book_name,
         "publisher": req.body.publisher,
         "binding": req.body.binding,
@@ -38,7 +46,7 @@ router.post('/post', upload.single('imgUploader'), function (req, res, nex) {
         "status":"active",
         "created_on": today,
         "updated_on": today,
-        "book_images": req.file.filename,
+        "book_images":file,
     };
 
 

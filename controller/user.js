@@ -407,7 +407,7 @@ module.exports = {
         //// category add and edit post details
         app.post('/carrel/product_listing', function (req, res){
 
-            var whereuser="status='active'";
+            var whereuser="product_type='books'";
 
             transactions.select('cr_products',whereuser,'*',function(userresult){
                 if(userresult.status==1)
@@ -881,24 +881,25 @@ module.exports = {
                                         var total=0;
 
                                         for(var i=0; i<productRes.data.length;i++){
-                                            total=total+productRes.data[i].sub_total;
+                                            total+=productRes.data[i].price;
                                         }
                                         var d= new Date();
                                         var date1=date.format(d,formate);
 
                                         var valueisert=[[req.body.uid,productRes.data[0].business_id,total,'cash','confirmed',req.body.uid,date1]];
 
-                                        transactions.insert('cr_booking',column,valueisert,function(insertRes){
+                                        transactions.insert('cr_booking',column,valueisert,function(insertRes,error){
 
                                             if(insertRes.status==1){
-                                                var insertDetls=[];
+
+                                                let insert=[];
                                                 var coulm="booking_id,product_id,quantity,price,created_on,created_by";
                                                 for(var i=0; i<productRes.data.length;i++){
                                                     var isrT=[insertRes.data.insertId,productRes.data[i].product_id,productRes.data[i].quantity,productRes.data[i].price,date1,req.body.uid];
-                                                    insertDetls.push(isrT);
+                                                    insert.push(isrT);
 
                                                 }
-                                                transactions.insert('cr_booking_detail',coulm,insertDetls,function(inserTdelt){
+                                                transactions.insert('cr_booking_detail',coulm,insert,function(inserTdelt){
 
                                                     if(inserTdelt.status==1){
 
@@ -918,9 +919,7 @@ module.exports = {
                                                 });
 
                                             }
-                                            else res.send({status:0,message:"You have not any product in your cart."});
-
-
+                                            else res.send({status:0,message:"You have not any product in your cart. fist onne"});
 
                                         });
 
@@ -1114,14 +1113,122 @@ module.exports = {
                 transactions.CheckAccessToken('cr_devices', req.body, function (result) {
                     if (result.status == 1) {
                         if (result.data.length > 0) {
-                            var selectProduct='SELECT * FROM cr_stationary';
-                            transactions.customeQuery(selectProduct,function(productRes){
-                                if(productRes.status==1) {
+
+                            var whereuser="product_type!='books'";
+
+                            transactions.select('cr_products',whereuser,'*',function(userresult){
+                                if(userresult.status==1)
+                                {
                                     res.send({
                                         status:1,
                                         message: 'success',
-                                        data:productRes.data
+                                        data:userresult.data
                                     });
+                                }
+                                else{
+                                    res.send({
+                                        status:0,
+                                        message:userresult.err
+                                    });
+                                }
+
+                            });
+
+
+
+                            // var selectProduct='SELECT * FROM cr_stationary';
+                            // transactions.customeQuery(selectProduct,function(productRes){
+                            //     if(productRes.status==1) {
+                            //         res.send({
+                            //             status:1,
+                            //             message: 'success',
+                            //             data:productRes.data
+                            //         });
+                            //     }
+                            //     else{
+                            //         res.send({
+                            //             status:0,
+                            //             message:productRes.err
+                            //         });
+                            //     }
+                            // });
+
+                        } else {
+                            res.send({status: 3, message: 'Invalid access token'});
+                        }
+                    } else {
+                        res.send({status: 0, message: result.err});
+
+                    }
+                });
+            }
+
+        })
+
+
+        app.post('/carrel/myorders', function (req, res) {
+            //console.log(req.body);
+            req.checkBody('api_key', '*API Key is required.').notEmpty();
+            req.checkBody('device_id', '*Device Id  is required.').notEmpty();
+            req.checkBody('device_type', '*Device Type is required.').notEmpty();
+            req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
+            req.checkBody('access_token', '*Access token is required.').notEmpty();
+            req.checkBody('uid', '*User id is required.').notEmpty();
+            if (req.validationErrors()) {
+                var message = req.validationErrors();
+                var result = {status: 0, message: message[0].msg};
+                return res.send(result);
+            }
+            else {
+                //Check access token
+                transactions.CheckAccessToken('cr_devices', req.body, function (result) {
+                    if (result.status == 1) {
+                        if (result.data.length > 0) {
+                            var selectProduct='SELECT * FROM cr_booking WHERE user_id='+req.body.uid;
+                            transactions.customeQuery(selectProduct,function(productRes){
+                                if(productRes.status==1) {
+                                    let id = productRes.data[0].id;
+                                    var select='SELECT * FROM cr_booking_detail WHERE booking_id='+id;
+                                    transactions.customeQuery(select,function(restwo){
+                                        if(restwo.status==1) {
+                                            let id = restwo.data[0].product_id;
+                                            var selectpro='SELECT * FROM cr_products WHERE id='+id;
+                                            transactions.customeQuery(selectpro,function(restwo){
+                                                if(restwo.status==1) {
+                                                    res.send({
+                                                        status:1,
+                                                        message: 'success',
+                                                        data:restwo.data
+                                                    });
+                                                }
+                                                else{
+                                                    res.send({
+                                                        status:0,
+                                                        message:restwo.err
+                                                    });
+                                                }
+                                            });
+
+                                            // res.send({
+                                            //     status:1,
+                                            //     message: 'success',
+                                            //     data:restwo.data
+                                            // });
+                                        }
+                                        else{
+                                            res.send({
+                                                status:0,
+                                                message:restwo.err
+                                            });
+                                        }
+                                    });
+
+
+                                    // res.send({
+                                    //     status:1,
+                                    //     message: 'success',
+                                    //     data:productRes.data
+                                    // });
                                 }
                                 else{
                                     res.send({
@@ -1142,6 +1249,7 @@ module.exports = {
             }
 
         })
+
 
 
     } //configure End

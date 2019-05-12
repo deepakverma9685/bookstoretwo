@@ -39,20 +39,22 @@ function Transaction() {
     };
     
     // Insert data in tables
-    this.insert = function (table,column,value,callback){
+    this.insert = function (table, column, value, callback) {
 
-          // insert statment
-          let query = "INSERT INTO "+table+"("+column+")  VALUES ? ";
-            connection.query(query, [value],(err, result, fields) => {
-                if (err){
-					 callback({status:2,err:err.message});
-					}else{
-                    callback({status:1,data:result});
-			     }
-                // get inserted rows
-              //  console.log('Row inserted:' + result.affectedRows);
+        // insert statment
+        let query = "INSERT INTO " + table + "(" + column + ")  VALUES ? ";
+        connection.query(query, [value], (err, result, fields) => {
+            console.log(err);
+            if (err) {
+                console.log(err);
+                callback({status: 2, err: err.message});
+            } else {
+                callback({status: 1, data: result});
+            }
+            // get inserted rows
+            //  console.log('Row inserted:' + result.affectedRows);
 
-              });
+        });
 
     };
        //Count all result on
@@ -104,18 +106,19 @@ function Transaction() {
      };
 
     //customeQuery
-    this.customeQuery = function (query,callback){
-          //console.log(data);return false;
-              connection.query(query, function (err, result,fields) {
-                 if(err){
-					 callback({status:2,err:err});	
-					 }
-				   else
-					 {
-					 callback({status:1,data:result});								 
-					 }
-             });
-     };
+    this.customeQuery = function (query, callback) {
+        //console.log(data);return false;
+        connection.query(query, function (err, result, fields) {
+            console.log(err);
+            console.log(result)
+            if (err) {
+                callback({status: 2, err: err});
+            }
+            else {
+                callback({status: 1, data: result});
+            }
+        });
+    };
      //join two table with limit or pagination serach
     this.joinTwoWithWhereLimit = function (select,tbl1,tbl2,feild1,feild2,where,offset,orderby,callback){
            let query="SELECT "+select+" FROM "+tbl1+" JOIN "+tbl2+" ON "+tbl1+"."+feild1+" = "+tbl2+"."+feild2+" WHERE "+where+orderby+" Limit "+offset.start+","+offset.limit+"";

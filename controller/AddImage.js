@@ -16,7 +16,6 @@ router.post('/api/Upload', upload.single('imgUploader'), function (req, res) {
         console.log('Uploading file...');
         var filename = req.file.filename;
         var uploadStatus = 'File Uploaded Successfully';
-        console.log();
     }
     else {
         console.log('No File Uploaded');

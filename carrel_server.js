@@ -11,17 +11,10 @@ app.use(bodyParser.json());
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'public')));
 
-var Storage = multer.diskStorage({
-    destination: function (req, file, callback) {
-        callback(null,path.join(__dirname, '/public'));
-    },
-    filename: function (req, file, callback) {
-        callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
-    }
-});
 
-app.use(express.static(path.join(__dirname, '/public')));
+
 var constant = require('./connection/constant');
 var user = require('./controller/user'); 
 var teacher = require('./controller/teacher');
