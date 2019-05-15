@@ -27,6 +27,7 @@ module.exports = {
             req.checkBody('insti_name', '*Intitute name is required.').notEmpty();
             req.checkBody('description', '*Description is required.').notEmpty();
             req.checkBody('phone', '*Phone is required.').notEmpty();
+            req.checkBody('teachtype', '*Type is required.').notEmpty();
 
 
             if (req.validationErrors()) {
@@ -94,7 +95,9 @@ module.exports = {
             req.checkBody('insti_image', '*Image is required.').notEmpty();
             req.checkBody('stc', '*Subject is required.').notEmpty();
             req.checkBody('phone', '*Phone is required.').notEmpty();
-
+            req.checkBody('teachtype', '*Type is required.').notEmpty();
+            req.checkBody('insti_name', '*Intitute name is required.').notEmpty();
+            req.checkBody('description', '*Description is required.').notEmpty();
 
             if (req.validationErrors()) {
                 var message = req.validationErrors();
@@ -109,8 +112,10 @@ module.exports = {
                         if (result.data.length > 0) {
                             var d= new Date();
                             var date1=date.format(d,formate);
-                            var column='`uid`,`address`,`latitude`,`longitude`,`insti_image`,`stc`,`phone`,`created_by`,`created_on`';
+                            var column='`insti_name`,`description`,`uid`,`address`,`latitude`,`longitude`,`insti_image`,`stc`,`phone`,`created_by`,`created_on`';
                             var valueisert=[[
+                                req.body.insti_name,
+                                req.body.description,
                                 req.body.uid,
                                 req.body.address,
                                 req.body.latitude,

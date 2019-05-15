@@ -109,8 +109,6 @@ function Transaction() {
     this.customeQuery = function (query, callback) {
         //console.log(data);return false;
         connection.query(query, function (err, result, fields) {
-            console.log(err);
-            console.log(result)
             if (err) {
                 callback({status: 2, err: err});
             }
