@@ -1007,6 +1007,56 @@ module.exports = {
 
         });
 
+
+        app.post('/carrel/myque', function (req, res) {
+            //console.log(req.body);
+            req.checkBody('api_key', '*API Key is required.').notEmpty();
+            req.checkBody('device_id', '*Device Id  is required.').notEmpty();
+            req.checkBody('device_type', '*Device Type is required.').notEmpty();
+            req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
+            req.checkBody('access_token', '*Access token is required.').notEmpty();
+            req.checkBody('uid', '*User id is required.').notEmpty();
+                if (req.validationErrors()) {
+                var message = req.validationErrors();
+                // var messg=req.flash();
+                var result = {status: 0, message: message[0].msg};
+                return res.send(result);
+            }
+            else {
+                //Check access token
+                transactions.CheckAccessToken('cr_devices', req.body, function (result) {
+                    if (result.status == 1) {
+                        if (result.data.length > 0) {
+
+                            let selectProduct='SELECT * FROM cr_student_que WHERE user_id ='+req.body.uid;
+                            transactions.customeQuery(selectProduct,function(productRes){
+                                if(productRes.status==1) {
+                                    res.send({
+                                        status:1,
+                                        message: 'success',
+                                        data:productRes.data
+                                    });
+                                }
+                                else{
+                                    res.send({
+                                        status:0,
+                                        message:productRes.err
+                                    });
+                                }
+                            });
+
+                        } else {
+                            res.send({status: 3, message: 'Invalid access token'});
+                        }
+                    } else {
+                        res.send({status: 0, message: result.err});
+
+                    }
+                });
+            }
+
+        });
+
         app.post('/carrel/answer_que', function (req, res) {
             //console.log(req.body);
             req.checkBody('api_key', '*API Key is required.').notEmpty();
@@ -1198,25 +1248,6 @@ module.exports = {
 
                             });
 
-
-
-                            // var selectProduct='SELECT * FROM cr_stationary';
-                            // transactions.customeQuery(selectProduct,function(productRes){
-                            //     if(productRes.status==1) {
-                            //         res.send({
-                            //             status:1,
-                            //             message: 'success',
-                            //             data:productRes.data
-                            //         });
-                            //     }
-                            //     else{
-                            //         res.send({
-                            //             status:0,
-                            //             message:productRes.err
-                            //         });
-                            //     }
-                            // });
-
                         } else {
                             res.send({status: 3, message: 'Invalid access token'});
                         }
@@ -1227,7 +1258,7 @@ module.exports = {
                 });
             }
 
-        })
+        });
 
 
         app.post('/carrel/myorders', function (req, res) {
@@ -1251,38 +1282,69 @@ module.exports = {
                             var selectProduct='SELECT * FROM cr_booking WHERE user_id='+req.body.uid;
                             transactions.customeQuery(selectProduct,function(productRes){
                                 if(productRes.status==1) {
-                                    let id = productRes.data[0].id;
-                                    var select='SELECT * FROM cr_booking_detail WHERE booking_id='+id;
-                                    transactions.customeQuery(select,function(restwo){
-                                        if(restwo.status==1) {
-                                            let id = restwo.data[0].product_id;
-                                            var selectpro='SELECT * FROM cr_products WHERE id='+id;
-                                            transactions.customeQuery(selectpro,function(restwo){
-                                                if(restwo.status==1) {
-                                                    res.send({
-                                                        status:1,
-                                                        message: 'success',
-                                                        data:restwo.data
-                                                    });
-                                                }
-                                                else{
-                                                    res.send({
-                                                        status:0,
-                                                        message:restwo.err
-                                                    });
-                                                }
-                                            });
+                                    res.send({
+                                        status:1,
+                                        message: 'success',
+                                        data:productRes.data
+                                    });
+                                }
+                                else{
+                                    res.send({
+                                        status:0,
+                                        message:productRes.err
+                                    });
+                                }
+                            });
 
-                                            // res.send({
-                                            //     status:1,
-                                            //     message: 'success',
-                                            //     data:restwo.data
-                                            // });
-                                        }
-                                        else{
+                        } else {
+                            res.send({status: 3, message: 'Invalid access token'});
+                        }
+                    } else {
+                        res.send({status: 0, message: result.err});
+
+                    }
+                });
+            }
+
+        });
+
+
+
+        app.post('/carrel/myorderdetail', function (req, res) {
+            //console.log(req.body);
+            req.checkBody('api_key', '*API Key is required.').notEmpty();
+            req.checkBody('device_id', '*Device Id  is required.').notEmpty();
+            req.checkBody('device_type', '*Device Type is required.').notEmpty();
+            req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
+            req.checkBody('access_token', '*Access token is required.').notEmpty();
+            req.checkBody('uid', '*User id is required.').notEmpty();
+            req.checkBody('booking_id', '*Booking id is required.').notEmpty();
+            if (req.validationErrors()) {
+                var message = req.validationErrors();
+                var result = {status: 0, message: message[0].msg};
+                return res.send(result);
+            }
+            else {
+                //Check access token
+                transactions.CheckAccessToken('cr_devices', req.body, function (result) {
+                    if (result.status == 1) {
+                        if (result.data.length > 0) {
+                            var selectProduct='SELECT * FROM cr_booking_detail WHERE booking_id='+req.body.booking_id;
+                            transactions.customeQuery(selectProduct,function(productRes){
+                                if(productRes.status==1) {
+
+                                    var selectProduct='SELECT * FROM cr_products WHERE id='+productRes.data[0].product_id;
+                                    transactions.customeQuery(selectProduct,function(resp){
+                                        if(resp.status==1) {
+                                            res.send({
+                                                status:1,
+                                                message: 'success',
+                                                data:resp.data
+                                            });
+                                        } else{
                                             res.send({
                                                 status:0,
-                                                message:restwo.err
+                                                message:resp.err
                                             });
                                         }
                                     });
