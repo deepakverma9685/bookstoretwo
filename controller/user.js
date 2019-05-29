@@ -1057,6 +1057,59 @@ module.exports = {
 
         });
 
+
+
+        app.post('/carrel/myans', function (req, res) {
+            //console.log(req.body);
+            req.checkBody('api_key', '*API Key is required.').notEmpty();
+            req.checkBody('device_id', '*Device Id  is required.').notEmpty();
+            req.checkBody('device_type', '*Device Type is required.').notEmpty();
+            req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
+            req.checkBody('access_token', '*Access token is required.').notEmpty();
+            req.checkBody('uid', '*User id is required.').notEmpty();
+            req.checkBody('que_id', '*User id is required.').notEmpty();
+            if (req.validationErrors()) {
+                var message = req.validationErrors();
+                // var messg=req.flash();
+                var result = {status: 0, message: message[0].msg};
+                return res.send(result);
+            }
+            else {
+                //Check access token
+                transactions.CheckAccessToken('cr_devices', req.body, function (result) {
+                    if (result.status == 1) {
+                        if (result.data.length > 0) {
+
+                            let selectProduct='SELECT * FROM cr_student_ans WHERE que_id ='+req.body.que_id;
+                            transactions.customeQuery(selectProduct,function(productRes){
+                                if(productRes.status==1) {
+                                    res.send({
+                                        status:1,
+                                        message: 'success',
+                                        data:productRes.data
+                                    });
+                                }
+                                else{
+                                    res.send({
+                                        status:0,
+                                        message:productRes.err
+                                    });
+                                }
+                            });
+
+                        } else {
+                            res.send({status: 3, message: 'Invalid access token'});
+                        }
+                    } else {
+                        res.send({status: 0, message: result.err});
+
+                    }
+                });
+            }
+
+        });
+
+
         app.post('/carrel/answer_que', function (req, res) {
             //console.log(req.body);
             req.checkBody('api_key', '*API Key is required.').notEmpty();
