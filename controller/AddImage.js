@@ -7,7 +7,7 @@ var upload = multer({storage: Stoarge});
 //var upload = multer({ storage: Stoarge }).array("imgUploader", 3); //Field name and max count
 
 router.get("/", function (req, res) {
-    res.sendFile("D:/Work_Space/NodeRepo/bookstoretwo/index.html");
+    res.sendFile("index");
 });
 
 

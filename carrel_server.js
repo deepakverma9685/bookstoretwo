@@ -32,8 +32,7 @@ var thankyouindex = require('./controller/thankyou');
 var addbook = require('./controller/addbooks');
 var stationary = require('./controller/Stationary');
 var thankyoustat = require('./controller/tankyoustat');
-var add = require('./controller/AddIm' +
-    'age');
+var add = require('./controller/AddImage');
 
 app.use('/addbooks',addbook);
 app.use('/thank',thankyouindex);
