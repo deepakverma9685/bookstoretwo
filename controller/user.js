@@ -1,6 +1,10 @@
 //custom route for fetching data
 var transactions = require('../models/core');
 var EncryptDecrypt = require('../models/encrypt_decrypt');
+var multer = require('multer');
+var Stoarge = require("../connection/Storage");
+var upload = multer({storage: Stoarge});
+
 
 module.exports = {
     //set up route configuration that will be handle by express server
@@ -343,6 +347,8 @@ module.exports = {
                     }else{
                         if(req.body.type=='get'){
                             var whereuser="id='"+req.body.id+"' AND status!='delete'";
+
+
 
                             transactions.select('cr_products',whereuser,'*',function(userresult){
                                 if(userresult.status==1)
@@ -1427,7 +1433,95 @@ module.exports = {
                 });
             }
 
-        })
+        });
+
+
+        app.post('/carrel/update_profile',upload.single('profile_pic'), function (req, res){
+            // console.log(req.body); return false;
+            req.checkBody('api_key', '*API Key is required.').notEmpty();
+            req.checkBody('api_key', '*Invalid api key').equals(ApiKey);
+            req.checkBody('device_id', '*Device Id  is required.').notEmpty();
+            req.checkBody('device_type', '*Device Type is required.').notEmpty();
+            req.checkBody('full_name', '*Firstname is required.').notEmpty();
+            req.checkBody('address', '*address  is required').notEmpty();
+            req.checkBody('country_code', '*Mobile Number  is required').notEmpty();
+            req.checkBody('uid', '*User id is required.').notEmpty();
+            req.checkBody('access_token', '*Access token is required.').notEmpty();
+
+
+            let isFile = false;
+            let file = "";
+            if(req.file){
+                file = req.file.filename;
+                isFile = true;
+            }else {
+                file = "";
+                isFile = false;
+            }
+
+            if(req.validationErrors())
+            {
+                var message=req.validationErrors();
+                // var messg=req.flash();
+                var result={status:0,message:message[0].msg};
+                return res.send(result);
+            }
+            else{
+                transactions.CheckAccessToken('cr_devices', req.body, function (result) {
+                    if (result.status == 1) {
+                        if (result.data.length > 0) {
+
+                            let today = new Date();
+                            let date1=date.format(today,formate);
+
+                            let updatevalue = "";
+                            if (isFile){
+                                updatevalue="full_name='"+req.body.full_name+"',address='"+req.body.address+"',country_code='"+req.body.country_code+"',updated_by='"+req.body.uid+"',updated_on='"+date1+"',profile_pic='"+file+"'";
+                            }else {
+                                updatevalue="full_name='"+req.body.full_name+"',address='"+req.body.address+"',country_code='"+req.body.country_code+"',updated_by='"+req.body.uid+"',updated_on='"+date1+"'";
+                            }
+
+                            let where_update = "id='"+req.body.uid+"'";
+
+                            transactions.update("cr_users",updatevalue,where_update,function(productRes){
+                                if(productRes.status==1) {
+
+                                    var selectProduct='SELECT * FROM cr_users WHERE id='+req.body.uid;
+                                    transactions.customeQuery(selectProduct,function(resp){
+                                        if(resp.status==1) {
+                                            res.send({
+                                                status:1,
+                                                message: 'success',
+                                                data:resp.data
+                                            });
+                                        } else{
+                                            res.send({
+                                                status:0,
+                                                message:resp.err
+                                            });
+                                        }
+                                    });
+                                }
+                                else{
+                                    res.send({
+                                        status:0,
+                                        message:productRes.err
+                                    });
+                                }
+                            });
+
+                        } else {
+                            res.send({status: 3, message: 'Invalid access token'});
+                        }
+                    } else {
+                        res.send({status: 0, message: result.err});
+
+                    }
+                });
+
+            }
+
+        });
 
 
 

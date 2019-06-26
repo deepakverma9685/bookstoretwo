@@ -79,7 +79,7 @@ function Transaction() {
 
           // update statment
           let query = "UPDATE "+table+" SET "+value+" WHERE "+where;
-              //console.log(query); //return false;
+              console.log(query); //return false;
               connection.query(query, function (err, result,fields) {
                  if (err){
 					 callback({status:2,err:err.message});
@@ -90,6 +90,23 @@ function Transaction() {
              });
 
     };
+
+    this.updatetwo = function (table,value,where,callback){
+
+        // update statment
+        let query = "UPDATE "+table+" SET "+value+" WHERE "+where;
+        //console.log(query); //return false;
+        connection.query(query, function (err, result,fields) {
+            if (err){
+                callback({status:2,err:err.message});
+            }else{
+                callback({status:1,data:result});
+            }
+            //res.send(result);
+        });
+
+    };
+
 
     // delete data in table
     this.delete = function (table,whereCondition,callback) {
